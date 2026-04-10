@@ -6,7 +6,7 @@
     <title>💎 MBA • TON Clicker</title>
     
     <!-- TON Connect SDK -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@2.0.0/dist/tonconnect-ui.min.js"></script>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
@@ -112,15 +112,15 @@
             gap: 8px;
         }
 
-        #connectWalletBtn {
-            background: linear-gradient(135deg, #0098EA 0%, #0066CC 100%);
+        #connect-wallet-btn {
+            background: linear-gradient(135deg, #0088CC 0%, #0055AA 100%);
             border: none;
             color: white;
             font-weight: 700;
             padding: 12px 20px;
             border-radius: 40px;
             font-size: 14px;
-            box-shadow: 0 4px 15px rgba(0, 152, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
             cursor: pointer;
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -128,12 +128,16 @@
             letter-spacing: 0.5px;
         }
 
-        #connectWalletBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 152, 234, 0.6);
+        #connect-wallet-btn.connected {
+            background: linear-gradient(135deg, #00C851 0%, #007E33 100%);
+            box-shadow: 0 4px 15px rgba(0, 200, 81, 0.4);
         }
 
-        #connectWalletBtn:active {
+        #connect-wallet-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        #connect-wallet-btn:active {
             transform: translateY(0);
         }
 
@@ -285,6 +289,13 @@
             transition: all 0.2s;
         }
 
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
         .withdraw-btn {
             width: 100%;
             background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
@@ -294,7 +305,6 @@
             font-size: 18px;
             padding: 18px;
             border-radius: 50px;
-            margin-top: 20px;
             cursor: pointer;
             box-shadow: 
                 0 8px 20px rgba(255, 215, 0, 0.3),
@@ -308,6 +318,11 @@
         .withdraw-btn:active {
             transform: scale(0.97);
             box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .withdraw-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Кейсы */
@@ -431,34 +446,9 @@
                 font-size: 28px;
             }
         }
-
-        /* Частицы на фоне */
-        .particle {
-            position: fixed;
-            width: 2px;
-            height: 2px;
-            background: #00d4ff;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: floatParticle 8s infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes floatParticle {
-            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            50% { opacity: 0.5; }
-        }
     </style>
 </head>
 <body>
-    <!-- Декоративные частицы -->
-    <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
-    <div class="particle" style="top: 70%; left: 80%; animation-delay: 2s;"></div>
-    <div class="particle" style="top: 50%; left: 30%; animation-delay: 4s;"></div>
-    <div class="particle" style="top: 80%; left: 20%; animation-delay: 1s;"></div>
-    <div class="particle" style="top: 10%; left: 90%; animation-delay: 3s;"></div>
-
     <div class="app-container">
         <!-- Хедер -->
         <header>
@@ -471,7 +461,7 @@
                     </div>
                 </div>
                 <div class="ton-connect-wrapper">
-                    <button id="connectWalletBtn" class="ton-connect-btn">
+                    <button id="connect-wallet-btn">
                         💎 Connect TON
                     </button>
                     <div id="walletAddress" class="wallet-address"></div>
@@ -516,11 +506,14 @@
                         </div>
                         <div id="tapEffect" class="tap-effect">+1</div>
                     </div>
-                    <p class="tap-hint">✨ 1 ТАП = 1 $MBA (0.001 ⭐️)</p>
+                    <p class="tap-hint">✨ 1 ТАП = 1 $MBA (0.001 TON)</p>
                 </div>
-                <button id="withdrawBtn" class="withdraw-btn">
-                    ⭐ Обменять на Звезды
-                </button>
+                
+                <div class="action-buttons">
+                    <button id="withdrawBtn" class="withdraw-btn">
+                        💎 Вывести в TON
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -587,22 +580,12 @@
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // Инициализация TON Connect
-        let tonConnectUI;
-        try {
-            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: 'https://gist.githubusercontent.com/example/manifest.json',
-                buttonRootId: 'connectWalletBtn'
-            });
-        } catch (e) {
-            console.log('TON Connect UI загружен, но требует манифест');
-        }
-
         // Состояние приложения
-        let userBalance = 1000; // Стартовый баланс для демо
+        let userBalance = 1000;
         let casesOpened = 0;
         let tapCounter = 0;
         const TAP_BATCH_SIZE = 10;
+        let connectedWallet = null;
 
         // DOM элементы
         const balanceDisplay = document.getElementById('balanceDisplay');
@@ -610,14 +593,61 @@
         const coin = document.getElementById('coin');
         const tapEffect = document.getElementById('tapEffect');
         const withdrawBtn = document.getElementById('withdrawBtn');
+        const connectWalletBtn = document.getElementById('connect-wallet-btn');
         const walletAddressDiv = document.getElementById('walletAddress');
 
-        // Обновление UI баланса
+        // Инициализация TON Connect
+        let tonConnectUI;
+        
+        try {
+            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://gist.githubusercontent.com/anonymous/tonconnect-manifest.json/raw/manifest.json',
+                buttonRootId: 'connect-wallet-btn'
+            });
+
+            // Подписываемся на изменения статуса кошелька
+            tonConnectUI.onStatusChange(wallet => {
+                if (wallet) {
+                    connectedWallet = wallet;
+                    const address = wallet.account.address;
+                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                    walletAddressDiv.textContent = shortAddress;
+                    connectWalletBtn.textContent = '✅ TON CONNECTED';
+                    connectWalletBtn.classList.add('connected');
+                    
+                    console.log('✅ Кошелек подключен:', address);
+                    
+                    // Отправляем адрес боту
+                    if (tg.sendData) {
+                        tg.sendData(JSON.stringify({
+                            action: 'wallet_connected',
+                            wallet_address: address
+                        }));
+                    }
+                } else {
+                    connectedWallet = null;
+                    walletAddressDiv.textContent = '';
+                    connectWalletBtn.textContent = '💎 Connect TON';
+                    connectWalletBtn.classList.remove('connected');
+                    
+                    console.log('❌ Кошелек отключен');
+                }
+            });
+
+            console.log('✅ TON Connect UI инициализирован');
+        } catch (e) {
+            console.error('❌ Ошибка инициализации TON Connect:', e);
+            connectWalletBtn.addEventListener('click', () => {
+                tg.showAlert('TON Connect временно недоступен. Попробуйте позже.');
+            });
+        }
+
+        // Функция обновления UI баланса
         function updateBalanceUI() {
             balanceDisplay.textContent = userBalance.toLocaleString();
         }
 
-        // Обновление статистики кейсов
+        // Функция обновления статистики кейсов
         function updateCasesStats() {
             casesOpenedDisplay.textContent = casesOpened;
         }
@@ -635,20 +665,16 @@
 
         // Обработка клика по монете
         coin.addEventListener('click', (e) => {
-            // Добавляем баланс
             userBalance += 1;
             tapCounter += 1;
             
-            // Обновляем UI
             updateBalanceUI();
             showTapAnimation();
             
-            // Вибрация (если поддерживается)
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('light');
             }
             
-            // Отправка данных боту батчами
             if (tapCounter >= TAP_BATCH_SIZE) {
                 if (tg.sendData) {
                     tg.sendData(JSON.stringify({
@@ -677,14 +703,12 @@
                 const cost = parseInt(e.target.dataset.cost);
                 
                 if (userBalance >= cost) {
-                    // Списываем стоимость
                     userBalance -= cost;
                     casesOpened++;
                     
                     updateBalanceUI();
                     updateCasesStats();
                     
-                    // Определяем шанс выпадения NFT
                     let nftChance = 0;
                     if (caseType === 'common') nftChance = 0.1;
                     else if (caseType === 'rare') nftChance = 0.4;
@@ -693,7 +717,6 @@
                     const gotNFT = Math.random() < nftChance;
                     const nftId = Math.floor(Math.random() * 10000);
                     
-                    // Показываем результат
                     let message = '';
                     let title = '';
                     
@@ -720,7 +743,6 @@
                         }
                     });
                     
-                    // Отправляем данные боту
                     if (tg.sendData) {
                         tg.sendData(JSON.stringify({
                             action: 'open_case',
@@ -730,13 +752,11 @@
                         }));
                     }
                     
-                    // Вибрация при открытии
                     if (tg.HapticFeedback) {
                         tg.HapticFeedback.notificationOccurred(gotNFT ? 'success' : 'warning');
                     }
                     
                 } else {
-                    // Недостаточно средств
                     tg.showAlert(`❌ Недостаточно $MBA!\n\nНужно ещё ${cost - userBalance} $MBA\n\nПродолжайте тапать!`);
                     
                     if (tg.HapticFeedback) {
@@ -746,35 +766,54 @@
             });
         });
 
-        // Вывод звезд
+        // Вывод средств в TON
         withdrawBtn.addEventListener('click', () => {
+            // Проверяем подключен ли кошелек
+            if (!connectedWallet) {
+                tg.showPopup({
+                    title: '💎 Требуется кошелек',
+                    message: 'Для вывода средств необходимо подключить TON кошелек.\n\nПодключить сейчас?',
+                    buttons: [
+                        {id: 'connect', type: 'default', text: '💎 ПОДКЛЮЧИТЬ'},
+                        {type: 'cancel', text: 'ОТМЕНА'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId === 'connect' && tonConnectUI) {
+                        tonConnectUI.openModal();
+                    }
+                });
+                return;
+            }
+            
             const requiredMBA = 1000;
             
             if (userBalance >= requiredMBA) {
-                const starsAmount = Math.floor(userBalance / requiredMBA);
+                const tonAmount = (userBalance / 1000000).toFixed(6); // 1,000,000 MBA = 1 TON
                 
                 tg.showPopup({
-                    title: '💫 ОБМЕН НА ЗВЕЗДЫ',
-                    message: `Вы хотите обменять ${starsAmount * requiredMBA} $MBA на ${starsAmount} ⭐️ Звезд Telegram?\n\nЗвёзды будут зачислены в течение 24 часов.`,
+                    title: '💎 ВЫВОД В TON',
+                    message: `Вы хотите вывести ${userBalance.toLocaleString()} $MBA?\n\n💰 Сумма: ${tonAmount} TON\n👛 Кошелек: ${walletAddressDiv.textContent}\n\nСредства будут отправлены в течение 24 часов.`,
                     buttons: [
                         {id: 'confirm', type: 'default', text: '✅ ПОДТВЕРДИТЬ'},
                         {type: 'cancel', text: '❌ ОТМЕНА'}
                     ]
                 }, (buttonId) => {
                     if (buttonId === 'confirm') {
-                        // Списываем баланс
-                        userBalance -= starsAmount * requiredMBA;
-                        updateBalanceUI();
-                        
-                        // Отправляем запрос боту
+                        // Отправляем запрос на вывод
                         if (tg.sendData) {
                             tg.sendData(JSON.stringify({
-                                action: 'withdraw_stars',
-                                amount: starsAmount
+                                action: 'withdraw_ton',
+                                amount_mba: userBalance,
+                                amount_ton: parseFloat(tonAmount),
+                                wallet_address: connectedWallet.account.address
                             }));
                         }
                         
-                        tg.showAlert(`✅ Заявка на ${starsAmount} ⭐️ Звезд отправлена!\n\nОжидайте зачисления от администратора.`);
+                        tg.showAlert(`✅ Заявка на вывод ${tonAmount} TON отправлена!\n\nОжидайте зачисления на кошелек.`);
+                        
+                        // Списываем баланс
+                        userBalance = 0;
+                        updateBalanceUI();
                         
                         if (tg.HapticFeedback) {
                             tg.HapticFeedback.notificationOccurred('success');
@@ -783,7 +822,7 @@
                 });
             } else {
                 const needed = requiredMBA - userBalance;
-                tg.showAlert(`❌ Недостаточно $MBA для обмена!\n\nНужно ещё ${needed} $MBA\n\nПродолжайте тапать!`);
+                tg.showAlert(`❌ Недостаточно $MBA для вывода!\n\nМинимальная сумма: 1,000 $MBA\nНужно ещё: ${needed} $MBA\n\nПродолжайте тапать!`);
                 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
@@ -796,11 +835,9 @@
             tab.addEventListener('click', () => {
                 const targetTab = tab.dataset.tab;
                 
-                // Обновляем активный таб
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 
-                // Показываем соответствующий контент
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.remove('active');
                 });
@@ -812,34 +849,12 @@
             });
         });
 
-        // Отслеживание статуса TON кошелька
-        if (tonConnectUI) {
-            const unsubscribe = tonConnectUI.onStatusChange(wallet => {
-                if (wallet) {
-                    const address = wallet.account.address;
-                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-                    walletAddressDiv.textContent = shortAddress;
-                    document.getElementById('connectWalletBtn').textContent = '✅ TON CONNECTED';
-                } else {
-                    walletAddressDiv.textContent = '';
-                    document.getElementById('connectWalletBtn').textContent = '💎 Connect TON';
-                }
-            });
-        }
-
-        // Установка цвета темы Telegram
+        // Инициализация UI
         tg.ready();
         tg.setHeaderColor('#0a0d1a');
         tg.setBackgroundColor('#0a0d1a');
-
-        // Инициализация UI
         updateBalanceUI();
         updateCasesStats();
-
-        // Обработка получения данных от бота (опционально)
-        tg.onEvent('mainButtonClicked', () => {
-            tg.sendData(JSON.stringify({ action: 'main_button_clicked' }));
-        });
 
         console.log('🚀 MBA TON Clicker загружен!');
     </script>
