@@ -2,180 +2,846 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💎 MBA • TON Clicker</title>
+    
+    <!-- TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
-        :root {
-            --bg: #0b0e16; --panel: #161b28; --accent: #3b82f6; --gold: #facc15;
-            --text: #ffffff; --green: #22c55e;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 30% 10%, #1a1f35 0%, #0a0d1a 100%);
+            color: white;
+            min-height: 100vh;
+            user-select: none;
+            padding: 16px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Gifts Battle Top Bar */
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; background: rgba(22, 27, 40, 0.95);
-            border-bottom: 2px solid #ffffff05;
+        /* Анимированный фон */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(100, 200, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 200, 100, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(200, 100, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .user-pill { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 4px 10px; border-radius: 12px; }
-        .avatar { width: 24px; height: 24px; border-radius: 6px; background: var(--accent); }
-
-        .currency-bar { display: flex; gap: 10px; }
-        .balance-badge {
-            background: #111827; border: 1px solid #ffffff10;
-            padding: 6px 12px; border-radius: 100px; display: flex; align-items: center; gap: 6px;
-            font-weight: 800; font-family: 'Luckiest Guy', cursive;
+        .app-container {
+            max-width: 420px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Контент */
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
-        
-        /* Banner а-ля Gifts Battle */
-        .event-banner {
-            background: linear-gradient(135deg, #1e40af, #3b82f6);
-            border-radius: 20px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        /* Стеклянный морфизм */
+        .glass-card {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 200, 255, 0.15);
+            border-radius: 28px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 20px;
         }
 
-        /* Секция кейсов */
-        .section-title { font-weight: 800; margin-bottom: 15px; font-size: 18px; color: var(--text); }
-        .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
+        /* Хедер */
+        .header-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px 20px;
+        }
+
+        .balance-block {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .balance-label {
+            font-size: 11px;
+            color: #8a9bb5;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .balance-value {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a0e9ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .balance-currency {
+            font-size: 14px;
+            color: #a0e9ff;
+            margin-left: 4px;
+            -webkit-text-fill-color: #a0e9ff;
+        }
+
+        .ton-connect-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        #connectWalletBtn {
+            background: linear-gradient(135deg, #0098EA 0%, #0066CC 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0, 152, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #connectWalletBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 152, 234, 0.6);
+        }
+
+        #connectWalletBtn:active {
+            transform: translateY(0);
+        }
+
+        .wallet-address {
+            font-size: 11px;
+            color: #a0e9ff;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        /* Табы */
+        .tabs-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 60px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #8a9bb5;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #1a3a5c 0%, #0f2440 100%);
+            color: white;
+            box-shadow: 
+                0 4px 15px rgba(0, 200, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Кликер */
+        .clicker-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .coin-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .coin-glow-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulseGlow 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .coin-image {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.5));
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .coin-image:active {
+            transform: scale(0.92);
+        }
+
+        .coin-svg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            animation: rotateCoin 20s linear infinite;
+            border: 4px solid rgba(255, 215, 0, 0.8);
+            box-shadow: 
+                0 0 60px rgba(255, 215, 0, 0.4),
+                inset 0 0 40px rgba(255, 215, 0, 0.2);
+        }
+
+        @keyframes rotateCoin {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .tap-hint {
+            color: #a0e9ff;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0, 200, 255, 0.5);
+            margin-top: 10px;
+        }
+
+        .tap-effect {
+            position: absolute;
+            top: 30%;
+            left: 55%;
+            color: #FFD700;
+            font-weight: 800;
+            font-size: 32px;
+            text-shadow: 
+                0 0 30px #FFD700,
+                0 0 60px #FFA500;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .withdraw-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: none;
+            color: #0a0d1a;
+            font-weight: 800;
+            font-size: 18px;
+            padding: 18px;
+            border-radius: 50px;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 
+                0 8px 20px rgba(255, 215, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .withdraw-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Кейсы */
+        .cases-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
         .case-card {
-            background: var(--panel); border-radius: 20px; padding: 15px;
-            text-align: center; border: 1px solid #ffffff05; position: relative;
-        }
-        .case-icon { font-size: 50px; margin-bottom: 10px; display: block; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
-        
-        .buy-btn {
-            background: var(--green); color: white; border: none; width: 100%;
-            padding: 10px; border-radius: 12px; font-family: 'Luckiest Guy';
-            font-size: 16px; margin-top: 10px; cursor: pointer;
-            box-shadow: 0 4px 0 #15803d; transition: 0.1s;
-        }
-        .buy-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #15803d; }
-
-        /* Тапалка */
-        .tap-area { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .maba-coin {
-            width: 250px; height: 250px;
-            background: url('https://i.ibb.co/Gfjby14B/maba-coin.png') center/contain no-repeat;
-            cursor: pointer; transition: transform 0.05s;
-            filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.4));
+            background: rgba(15, 25, 45, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            border-radius: 24px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Навигация */
-        .footer-nav {
-            position: fixed; bottom: 0; width: 100%; background: #0f172a;
-            display: flex; justify-content: space-around; padding: 12px 0 25px;
-            border-top: 1px solid #ffffff05;
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        .nav-link { color: #64748b; font-size: 22px; background: none; border: none; }
-        .nav-link.active { color: var(--accent); }
+
+        .case-card:hover::before {
+            opacity: 1;
+        }
+
+        .case-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .case-icon {
+            font-size: 48px;
+            filter: drop-shadow(0 0 20px rgba(0, 200, 255, 0.5));
+        }
+
+        .case-info {
+            flex: 1;
+        }
+
+        .case-name {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #a0e9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .case-chance {
+            font-size: 14px;
+            color: #8a9bb5;
+        }
+
+        .case-cost {
+            font-size: 18px;
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .open-case-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #2a4a6a 0%, #0e1a2b 100%);
+            border: 1px solid #4a9eff;
+            color: white;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 40px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #0a121f;
+            transition: all 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .open-case-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Статистика */
+        .stats-container {
+            margin-top: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stats-title {
+            color: #8a9bb5;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #FFD700;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 400px) {
+            .coin-wrapper {
+                width: 240px;
+                height: 240px;
+            }
+            .balance-value {
+                font-size: 28px;
+            }
+        }
+
+        /* Частицы на фоне */
+        .particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: #00d4ff;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: floatParticle 8s infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
+    <!-- Декоративные частицы -->
+    <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="top: 70%; left: 80%; animation-delay: 2s;"></div>
+    <div class="particle" style="top: 50%; left: 30%; animation-delay: 4s;"></div>
+    <div class="particle" style="top: 80%; left: 20%; animation-delay: 1s;"></div>
+    <div class="particle" style="top: 10%; left: 90%; animation-delay: 3s;"></div>
 
-    <div class="header">
-        <div class="user-pill">
-            <div class="avatar"></div>
-            <span id="u-name" style="font-size: 12px; font-weight: bold;">PLAYER</span>
-        </div>
-        <div class="currency-bar">
-            <div class="balance-badge" style="color: var(--gold); border-color: var(--gold);">
-                ★ <span id="stars-val">0</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="content">
-        <div id="tap-page" class="page-container">
-            <div class="tap-area">
-                <div class="maba-coin" id="coin"></div>
-                <h1 style="font-family: 'Luckiest Guy'; margin-top: 20px; color: var(--accent);">TAP TO EARN</h1>
-            </div>
-        </div>
-
-        <div id="shop-page" class="page-container" style="display:none;">
-            <div class="event-banner">
-                <h2 style="margin:0; font-family: 'Luckiest Guy';">MABANKS BATTLE</h2>
-                <p style="font-size: 12px; opacity: 0.8;">Выбивай редкие скины!</p>
-            </div>
-
-            <div class="section-title">КЕЙСЫ</div>
-            <div class="case-grid">
-                <div class="case-card">
-                    <span class="case-icon">📦</span>
-                    <div style="font-weight: bold;">БОМЖ</div>
-                    <button class="buy-btn" onclick="requestPayment(100, 'Бомж')">100 ★</button>
+    <div class="app-container">
+        <!-- Хедер -->
+        <header>
+            <div class="glass-card header-card">
+                <div class="balance-block">
+                    <span class="balance-label">MBA BALANCE</span>
+                    <div>
+                        <span class="balance-value" id="balanceDisplay">0</span>
+                        <span class="balance-currency">$MBA</span>
+                    </div>
                 </div>
-                <div class="case-card">
-                    <span class="case-icon">💼</span>
-                    <div style="font-weight: bold;">РАБОТЯГА</div>
-                    <button class="buy-btn" onclick="requestPayment(200, 'Работяга')">200 ★</button>
-                </div>
-                <div class="case-card">
-                    <span class="case-icon">🎰</span>
-                    <div style="font-weight: bold;">ЛУДКА</div>
-                    <button class="buy-btn" onclick="requestPayment(500, 'Лудка')">500 ★</button>
-                </div>
-                <div class="case-card">
-                    <span class="case-icon">🏎️</span>
-                    <div style="font-weight: bold;">МАЖОР</div>
-                    <button class="buy-btn" onclick="requestPayment(1000, 'Мажор')">1000 ★</button>
-                </div>
-                <div class="case-card" style="grid-column: span 2;">
-                    <span class="case-icon">🚀</span>
-                    <div style="font-weight: bold; color: var(--gold);">ЗАНОС</div>
-                    <button class="buy-btn" onclick="requestPayment(1999, 'Занос')">1999 ★</button>
+                <div class="ton-connect-wrapper">
+                    <button id="connectWalletBtn" class="ton-connect-btn">
+                        💎 Connect TON
+                    </button>
+                    <div id="walletAddress" class="wallet-address"></div>
                 </div>
             </div>
-        </div>
-    </div>
+        </header>
 
-    <div class="footer-nav">
-        <button class="nav-link active" onclick="tab('tap-page', this)"><i class="fas fa-hand-pointer"></i></button>
-        <button class="nav-link" onclick="tab('shop-page', this)"><i class="fas fa-box-open"></i></button>
+        <!-- Табы -->
+        <div class="tabs-container">
+            <button class="tab active" data-tab="clicker">💎 Кликер</button>
+            <button class="tab" data-tab="cases">🎁 Кейсы</button>
+        </div>
+
+        <!-- Контент кликера -->
+        <div id="clickerTab" class="tab-content active">
+            <div class="glass-card">
+                <div class="clicker-area">
+                    <div class="coin-wrapper" id="coin">
+                        <div class="coin-glow-effect"></div>
+                        <div class="coin-image">
+                            <svg class="coin-svg" viewBox="0 0 200 200">
+                                <defs>
+                                    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+                                    </linearGradient>
+                                    <filter id="glow">
+                                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                        <feMerge>
+                                            <feMergeNode in="coloredBlur"/>
+                                            <feMergeNode in="SourceGraphic"/>
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+                                <circle cx="100" cy="100" r="95" fill="url(#coinGrad)" filter="url(#glow)"/>
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.5"/>
+                                <text x="100" y="120" text-anchor="middle" fill="#8B4513" font-size="60" font-weight="900" font-family="Inter" filter="url(#glow)">MBA</text>
+                                <text x="100" y="150" text-anchor="middle" fill="#654321" font-size="16" font-weight="700" font-family="Inter">TON</text>
+                                <circle cx="100" cy="100" r="90" fill="none" stroke="#FFF8DC" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
+                            </svg>
+                        </div>
+                        <div id="tapEffect" class="tap-effect">+1</div>
+                    </div>
+                    <p class="tap-hint">✨ 1 ТАП = 1 $MBA (0.001 ⭐️)</p>
+                </div>
+                <button id="withdrawBtn" class="withdraw-btn">
+                    ⭐ Обменять на Звезды
+                </button>
+            </div>
+        </div>
+
+        <!-- Контент кейсов -->
+        <div id="casesTab" class="tab-content">
+            <div class="cases-grid">
+                <!-- Common Case -->
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-icon">📦</div>
+                        <div class="case-info">
+                            <div class="case-name">COMMON CASE</div>
+                            <div class="case-chance">Шанс NFT: 10%</div>
+                        </div>
+                    </div>
+                    <div class="case-cost">💰 50 $MBA</div>
+                    <button class="open-case-btn" data-case="common" data-cost="50">
+                        Открыть кейс
+                    </button>
+                </div>
+
+                <!-- Rare Case -->
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-icon">✨</div>
+                        <div class="case-info">
+                            <div class="case-name">RARE CASE</div>
+                            <div class="case-chance">Шанс NFT: 40%</div>
+                        </div>
+                    </div>
+                    <div class="case-cost">💰 200 $MBA</div>
+                    <button class="open-case-btn" data-case="rare" data-cost="200">
+                        Открыть кейс
+                    </button>
+                </div>
+
+                <!-- Legendary Case -->
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-icon">👑</div>
+                        <div class="case-info">
+                            <div class="case-name">LEGENDARY</div>
+                            <div class="case-chance">Шанс NFT: 100%</div>
+                        </div>
+                    </div>
+                    <div class="case-cost">💰 1000 $MBA</div>
+                    <button class="open-case-btn" data-case="legendary" data-cost="1000">
+                        Открыть кейс
+                    </button>
+                </div>
+            </div>
+
+            <!-- Статистика открытых кейсов -->
+            <div class="glass-card stats-container">
+                <div class="stats-title">🎯 ВСЕГО ОТКРЫТО КЕЙСОВ</div>
+                <div class="stats-value" id="casesOpened">0</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.enableClosingConfirmation();
 
-        function tab(id, el) {
-            document.getElementById('tap-page').style.display = 'none';
-            document.getElementById('shop-page').style.display = 'none';
-            document.getElementById(id).style.display = 'block';
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
+        // Инициализация TON Connect
+        let tonConnectUI;
+        try {
+            tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://gist.githubusercontent.com/example/manifest.json',
+                buttonRootId: 'connectWalletBtn'
+            });
+        } catch (e) {
+            console.log('TON Connect UI загружен, но требует манифест');
         }
 
-        document.getElementById('coin').onclick = (e) => {
-            tg.HapticFeedback.impactOccurred('medium');
-            e.target.style.transform = 'scale(0.9)';
-            setTimeout(() => e.target.style.transform = 'scale(1)', 50);
-        };
+        // Состояние приложения
+        let userBalance = 1000; // Стартовый баланс для демо
+        let casesOpened = 0;
+        let tapCounter = 0;
+        const TAP_BATCH_SIZE = 10;
 
-        // ФУНКЦИЯ СПИСАНИЯ ЗВЕЗД
-        function requestPayment(amount, title) {
-            // Отправляем данные боту, чтобы он выставил счет Stars
-            tg.sendData(JSON.stringify({
-                method: "stars_pay",
-                amount: amount,
-                title: title
-            }));
+        // DOM элементы
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const casesOpenedDisplay = document.getElementById('casesOpened');
+        const coin = document.getElementById('coin');
+        const tapEffect = document.getElementById('tapEffect');
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        const walletAddressDiv = document.getElementById('walletAddress');
+
+        // Обновление UI баланса
+        function updateBalanceUI() {
+            balanceDisplay.textContent = userBalance.toLocaleString();
         }
 
-        let user = tg.initDataUnsafe?.user;
-        if(user) document.getElementById('u-name').innerText = user.first_name.toUpperCase();
+        // Обновление статистики кейсов
+        function updateCasesStats() {
+            casesOpenedDisplay.textContent = casesOpened;
+        }
+
+        // Анимация тапа
+        function showTapAnimation() {
+            tapEffect.style.opacity = '1';
+            tapEffect.style.transform = 'translateY(-30px) scale(1.2)';
+            
+            setTimeout(() => {
+                tapEffect.style.opacity = '0';
+                tapEffect.style.transform = 'translateY(0) scale(1)';
+            }, 200);
+        }
+
+        // Обработка клика по монете
+        coin.addEventListener('click', (e) => {
+            // Добавляем баланс
+            userBalance += 1;
+            tapCounter += 1;
+            
+            // Обновляем UI
+            updateBalanceUI();
+            showTapAnimation();
+            
+            // Вибрация (если поддерживается)
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+            
+            // Отправка данных боту батчами
+            if (tapCounter >= TAP_BATCH_SIZE) {
+                if (tg.sendData) {
+                    tg.sendData(JSON.stringify({
+                        action: 'tap',
+                        count: tapCounter
+                    }));
+                }
+                tapCounter = 0;
+            }
+        });
+
+        // Сохранение оставшихся тапов при закрытии
+        window.addEventListener('beforeunload', () => {
+            if (tapCounter > 0 && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'tap',
+                    count: tapCounter
+                }));
+            }
+        });
+
+        // Открытие кейсов
+        document.querySelectorAll('.open-case-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const caseType = e.target.dataset.case;
+                const cost = parseInt(e.target.dataset.cost);
+                
+                if (userBalance >= cost) {
+                    // Списываем стоимость
+                    userBalance -= cost;
+                    casesOpened++;
+                    
+                    updateBalanceUI();
+                    updateCasesStats();
+                    
+                    // Определяем шанс выпадения NFT
+                    let nftChance = 0;
+                    if (caseType === 'common') nftChance = 0.1;
+                    else if (caseType === 'rare') nftChance = 0.4;
+                    else if (caseType === 'legendary') nftChance = 1.0;
+                    
+                    const gotNFT = Math.random() < nftChance;
+                    const nftId = Math.floor(Math.random() * 10000);
+                    
+                    // Показываем результат
+                    let message = '';
+                    let title = '';
+                    
+                    if (gotNFT) {
+                        title = '🎉 ПОЗДРАВЛЯЕМ!';
+                        message = `Вам выпал NFT!\n\n🏆 MBA Genesis #${nftId}\n\nОткрыть кошелек TON для получения?`;
+                    } else {
+                        title = '😢 УВЫ!';
+                        message = `NFT не выпал.\n\nПопробуйте ещё раз!\n\nВаш баланс: ${userBalance} $MBA`;
+                    }
+                    
+                    tg.showPopup({
+                        title: title,
+                        message: message,
+                        buttons: gotNFT ? [
+                            {id: 'wallet', type: 'default', text: '💎 ОТКРЫТЬ КОШЕЛЕК'},
+                            {type: 'cancel', text: 'ЗАКРЫТЬ'}
+                        ] : [
+                            {type: 'ok', text: 'ПОНЯТНО'}
+                        ]
+                    }, (buttonId) => {
+                        if (buttonId === 'wallet' && tonConnectUI) {
+                            tonConnectUI.openModal();
+                        }
+                    });
+                    
+                    // Отправляем данные боту
+                    if (tg.sendData) {
+                        tg.sendData(JSON.stringify({
+                            action: 'open_case',
+                            case_type: caseType,
+                            got_nft: gotNFT,
+                            nft_id: gotNFT ? nftId : null
+                        }));
+                    }
+                    
+                    // Вибрация при открытии
+                    if (tg.HapticFeedback) {
+                        tg.HapticFeedback.notificationOccurred(gotNFT ? 'success' : 'warning');
+                    }
+                    
+                } else {
+                    // Недостаточно средств
+                    tg.showAlert(`❌ Недостаточно $MBA!\n\nНужно ещё ${cost - userBalance} $MBA\n\nПродолжайте тапать!`);
+                    
+                    if (tg.HapticFeedback) {
+                        tg.HapticFeedback.notificationOccurred('error');
+                    }
+                }
+            });
+        });
+
+        // Вывод звезд
+        withdrawBtn.addEventListener('click', () => {
+            const requiredMBA = 1000;
+            
+            if (userBalance >= requiredMBA) {
+                const starsAmount = Math.floor(userBalance / requiredMBA);
+                
+                tg.showPopup({
+                    title: '💫 ОБМЕН НА ЗВЕЗДЫ',
+                    message: `Вы хотите обменять ${starsAmount * requiredMBA} $MBA на ${starsAmount} ⭐️ Звезд Telegram?\n\nЗвёзды будут зачислены в течение 24 часов.`,
+                    buttons: [
+                        {id: 'confirm', type: 'default', text: '✅ ПОДТВЕРДИТЬ'},
+                        {type: 'cancel', text: '❌ ОТМЕНА'}
+                    ]
+                }, (buttonId) => {
+                    if (buttonId === 'confirm') {
+                        // Списываем баланс
+                        userBalance -= starsAmount * requiredMBA;
+                        updateBalanceUI();
+                        
+                        // Отправляем запрос боту
+                        if (tg.sendData) {
+                            tg.sendData(JSON.stringify({
+                                action: 'withdraw_stars',
+                                amount: starsAmount
+                            }));
+                        }
+                        
+                        tg.showAlert(`✅ Заявка на ${starsAmount} ⭐️ Звезд отправлена!\n\nОжидайте зачисления от администратора.`);
+                        
+                        if (tg.HapticFeedback) {
+                            tg.HapticFeedback.notificationOccurred('success');
+                        }
+                    }
+                });
+            } else {
+                const needed = requiredMBA - userBalance;
+                tg.showAlert(`❌ Недостаточно $MBA для обмена!\n\nНужно ещё ${needed} $MBA\n\nПродолжайте тапать!`);
+                
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            }
+        });
+
+        // Переключение табов
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                
+                // Обновляем активный таб
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Показываем соответствующий контент
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(targetTab + 'Tab').classList.add('active');
+                
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.selectionChanged();
+                }
+            });
+        });
+
+        // Отслеживание статуса TON кошелька
+        if (tonConnectUI) {
+            const unsubscribe = tonConnectUI.onStatusChange(wallet => {
+                if (wallet) {
+                    const address = wallet.account.address;
+                    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                    walletAddressDiv.textContent = shortAddress;
+                    document.getElementById('connectWalletBtn').textContent = '✅ TON CONNECTED';
+                } else {
+                    walletAddressDiv.textContent = '';
+                    document.getElementById('connectWalletBtn').textContent = '💎 Connect TON';
+                }
+            });
+        }
+
+        // Установка цвета темы Telegram
+        tg.ready();
+        tg.setHeaderColor('#0a0d1a');
+        tg.setBackgroundColor('#0a0d1a');
+
+        // Инициализация UI
+        updateBalanceUI();
+        updateCasesStats();
+
+        // Обработка получения данных от бота (опционально)
+        tg.onEvent('mainButtonClicked', () => {
+            tg.sendData(JSON.stringify({ action: 'main_button_clicked' }));
+        });
+
+        console.log('🚀 MBA TON Clicker загружен!');
     </script>
 </body>
 </html>
