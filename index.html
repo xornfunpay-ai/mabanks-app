@@ -3,60 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Mabanks Clicker</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); 
-            color: white; 
-            text-align: center; 
-            font-family: 'Arial', sans-serif; 
-            margin: 0; 
-            overflow: hidden; 
-            user-select: none;
+        body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; text-align: center; }
+        .header { padding: 20px; font-size: 24px; color: #fbbf24; font-weight: bold; }
+        
+        /* Твоя монета */
+        .coin { 
+            width: 250px; height: 250px; margin: 40px auto; 
+            background: url('https://i.ibb.co/Gfjby14B/maba-coin.png') no-repeat center; 
+            background-size: contain; 
+            filter: drop-shadow(0 0 25px #fbbf24); 
+            transition: transform 0.1s; 
+            border: none; outline: none; -webkit-tap-highlight-color: transparent;
         }
-        .container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-        }
-        #balance { font-size: 48px; margin: 10px 0; color: #fbbf24; text-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
-        .coin-btn {
-            width: 250px;
-            height: 250px;
-            background: url('https://i.ibb.co/3ykXG3p/maba-coin.png') no-repeat center;
-            background-size: contain;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-            filter: drop-shadow(0 0 20px #fbbf24);
-        }
-        .coin-btn:active { transform: scale(0.92); }
-        p { opacity: 0.6; font-size: 14px; letter-spacing: 2px; }
+        .coin:active { transform: scale(0.95); }
+
+        /* Вкладки снизу */
+        .tabs { display: flex; justify-content: space-around; background: #1e293b; padding: 15px 0; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #334155; }
+        .tab-btn { background: none; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; }
+        .tab-btn.active { color: #fbbf24; font-weight: bold; }
+
+        .page { display: none; padding: 20px; padding-bottom: 100px; }
+        .page.active { display: block; }
+
+        /* Дизайн кейсов */
+        .case-card { background: #1e293b; padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid #fbbf24; }
+        .buy-btn { background: #fbbf24; color: black; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; margin-top: 15px; width: 100%; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <p>MABANKS BALANCE</p>
-        <div id="balance">0</div>
-        <button class="coin-btn" id="coin"></button>
+
+    <div id="game" class="page active">
+        <div class="header">СЧЕТ: <span id="balance">0</span></div>
+        <button class="coin" id="tap-btn"></button>
+    </div>
+
+    <div id="cases" class="page">
+        <div class="header">МАГАЗИН КЕЙСОВ</div>
+        <div class="case-card">
+            <h3>Pinchuk Case</h3>
+            <p>Цена: 100 монет</p>
+            <button class="buy-btn" onclick="openCase()">ОТКРЫТЬ</button>
+        </div>
+        <div id="inventory" style="margin-top: 20px; color: #94a3b8;">Твои скины: пока пусто</div>
+    </div>
+
+    <div id="top" class="page">
+        <div class="header">ЛИДЕРЫ</div>
+        <div style="text-align: left; max-width: 300px; margin: auto;">
+            <p>1. Pinchuchela — 999999</p>
+            <p>2. ТЫ — <span id="user-top">0</span></p>
+            <p>3. Nazar — 500</p>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('game', this)">ИГРА</button>
+        <button class="tab-btn" onclick="switchTab('cases', this)">КЕЙСЫ</button>
+        <button class="tab-btn" onclick="switchTab('top', this)">ТОП</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        let count = 0;
-        const balanceDisplay = document.getElementById('balance');
-        const coinBtn = document.getElementById('coin');
+        let balance = 0;
+        let skins = [];
 
-        coinBtn.addEventListener('click', () => {
-            count++;
-            balanceDisplay.innerText = count;
-            tg.HapticFeedback.impactOccurred('medium'); // Вибрация
-        });
+        document.getElementById('tap-btn').onclick = () => {
+            balance++;
+            updateUI();
+            tg.HapticFeedback.impactOccurred('medium');
+        };
+
+        function updateUI() {
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('user-top').innerText = balance;
+        }
+
+        function switchTab(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function openCase() {
+            if (balance >= 100) {
+                balance -= 100;
+                updateUI();
+                const items = ["Обычный Pinchuk", "Редкий Назар", "Золотой MABANKS", "Skin: PINCHUCHELA"];
+                const win = items[Math.floor(Math.random() * items.length)];
+                skins.push(win);
+                document.getElementById('inventory').innerText = "Твои скины: " + skins.join(", ");
+                alert("🔥 ВЫПАЛО: " + win);
+            } else {
+                alert("Мало монет, бро! Тапай еще.");
+            }
+        }
     </script>
 </body>
 </html>
