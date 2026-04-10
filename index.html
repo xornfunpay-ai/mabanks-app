@@ -4,231 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
         :root {
-            --bg: #0b0e16; --card-bg: #161b28; --accent: #3b82f6; --gold: #facc15;
-            --text-main: #ffffff; --text-secondary: #94a3b8;
+            --bg: #2b1d63;
+            --panel: #4a34a8;
+            --accent: #ffcb05;
+            --btn-orange: #ff8c00;
+            --text: #ffffff;
         }
 
         body {
-            background: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif;
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            background: var(--bg); color: var(--text);
+            font-family: 'Luckiest Guy', cursive; margin: 0;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* Верхняя панель */
+        /* Top Bar */
         .top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; background: rgba(11, 14, 22, 0.9); backdrop-filter: blur(10px); z-index: 100;
+            display: flex; justify-content: space-between; padding: 15px;
+            background: rgba(0,0,0,0.3); border-bottom: 4px solid rgba(0,0,0,0.2);
         }
 
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 35px; height: 35px; border-radius: 8px; background: linear-gradient(135deg, #3b82f6, #2dd4bf); display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .balance-container { display: flex; gap: 10px; }
-        .badge { background: #1e293b; padding: 5px 10px; border-radius: 10px; display: flex; align-items: center; gap: 5px; font-weight: bold; border: 1px solid #ffffff10; }
-        .btn-deposit { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .balance-box {
+            background: #1a1a1a; padding: 5px 15px; border-radius: 50px;
+            border: 3px solid #333; display: flex; align-items: center; gap: 10px;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.5);
+        }
 
-        /* Контент */
-        .content { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
-        .page { display: none; height: 100%; }
-        .page.active { display: block; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Тапалка */
+        .tap-content {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; position: relative;
+        }
 
-        /* Тапалка (Твоя монета с 3D эффектом наклона) */
-        .tap-area { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; perspective: 1000px; }
-        .coin-wrapper { width: 260px; height: 260px; transition: transform 0.1s ease-out; }
-        .coin {
-            width: 100%; height: 100%;
+        .coin-btn {
+            width: 280px; height: 280px;
             background: url('https://i.ibb.co/Gfjby14B/maba-coin.png') center/contain no-repeat;
-            filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.4));
-            -webkit-tap-highlight-color: transparent; border: none; outline: none;
+            border: none; outline: none; cursor: pointer;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 10px 0 rgba(0,0,0,0.3));
+        }
+        .coin-btn:active { transform: scale(0.85) rotate(5deg); }
+
+        /* Кейсы Мультяшные */
+        .case-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px;
+        }
+        .case-card {
+            background: var(--panel); border: 4px solid #ffffff20;
+            border-radius: 20px; padding: 15px; text-align: center;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+        }
+        .case-icon { font-size: 50px; margin-bottom: 10px; display: block; }
+        .buy-btn {
+            background: var(--btn-orange); border: none; padding: 10px;
+            border-radius: 12px; color: white; font-family: 'Luckiest Guy';
+            width: 100%; border-bottom: 4px solid #b36200; margin-top: 10px;
         }
 
-        /* Кейсы */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .case-item { background: var(--card-bg); border-radius: 16px; padding: 15px; text-align: center; border: 1px solid #ffffff05; }
-        .case-item:active { transform: scale(0.95); }
-        .case-img { width: 70px; height: 70px; margin: 0 auto 10px; font-size: 40px; display: flex; align-items: center; justify-content: center; }
-
-        /* Кошелек */
-        .wallet-box { background: var(--card-bg); padding: 20px; border-radius: 16px; border: 1px solid #ffffff05; text-align: center; margin-bottom: 20px; }
-
-        /* Нижнее меню */
+        /* Меню */
         .nav {
-            position: fixed; bottom: 0; width: 100%; background: #111827; display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 1px solid #ffffff05; z-index: 100;
+            background: #1a1a1a; display: flex; justify-content: space-around;
+            padding: 10px 0 30px; border-top: 5px solid #333;
         }
-        .nav-btn { background: none; border: none; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 10px; cursor: pointer; }
-        .nav-btn.active { color: var(--accent); }
-        .nav-btn i { font-size: 20px; }
-        .nav-center { width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -25px; color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .nav-item { color: #888; font-size: 24px; border: none; background: none; }
+        .nav-item.active { color: var(--accent); transform: scale(1.2); }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div class="user-info">
-            <div class="avatar" id="user-avatar">M</div>
-            <span style="font-weight: bold; font-size: 14px;" id="user-name">MABANKS</span>
+        <div class="balance-box">
+            <span style="color: #00f2ff;">💎</span> <span id="mba">0</span>
         </div>
-        <div class="balance-container">
-            <div class="badge"><span style="color: var(--gold)">★</span> <span id="stars-balance">0</span></div>
-            <button class="btn-deposit" onclick="buyStars()">+</button>
+        <div class="balance-box" onclick="depositStars()">
+            <span style="color: #ffcb05;">★</span> <span id="stars">0</span>
+            <span style="background: #00ff00; border-radius: 50%; width: 20px; height: 20px; color: black; line-height: 20px;">+</span>
         </div>
     </div>
 
-    <div class="content">
-        <div id="profile-page" class="page">
-            <h2 style="margin-top: 0;">Мой Профиль</h2>
-            <div class="wallet-box">
-                <p style="margin-top: 0; color: var(--text-secondary);">Подключи TON кошелек для вывода</p>
-                <div id="ton-connect" style="display: flex; justify-content: center;"></div>
-            </div>
-            
-            <div class="wallet-box">
-                <p style="margin-top: 0; color: var(--text-secondary);">Промокод</p>
-                <input type="text" id="promo-input" style="width: 80%; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #0b0e16; color: white; margin-bottom: 10px;" placeholder="Введи код...">
-                <button style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; width: 85%;" onclick="activatePromo()">Активировать</button>
-            </div>
+    <div id="game" class="page active">
+        <div class="tap-content">
+            <button class="coin-btn" id="tap"></button>
+            <h2 style="color: var(--accent); text-shadow: 2px 2px 0 #000;">TAP TAP!</h2>
         </div>
+    </div>
 
-        <div id="tap-page" class="page active">
-            <div style="text-align: center; margin-top: 10px; color: var(--text-secondary);">Баланс: <span id="mba-balance" style="color: white; font-weight: bold;">0</span> MBA</div>
-            <div class="tap-area">
-                <div class="coin-wrapper" id="coin-wrapper">
-                    <button class="coin" id="coin-btn"></button>
-                </div>
+    <div id="shop" class="page" style="display:none; overflow-y: auto;">
+        <div class="case-grid">
+            <div class="case-card">
+                <span class="case-icon">📦</span>
+                <div>БОМЖ</div>
+                <button class="buy-btn" onclick="openCase('Бомж', 100)">100 ★</button>
             </div>
-        </div>
-
-        <div id="cases-page" class="page">
-            <h2 style="margin-top: 0; margin-bottom: 15px;">Магазин Кейсов</h2>
-            <div class="grid">
-                <div class="case-item" onclick="openCase('Бомж', 100)">
-                    <div class="case-img">📦</div>
-                    <div style="font-weight: bold;">Бомж</div>
-                    <div style="font-size: 11px; color: var(--text-secondary);">100 ★</div>
-                </div>
-                <div class="case-item" onclick="openCase('Работяга', 200)">
-                    <div class="case-img">💼</div>
-                    <div style="font-weight: bold;">Работяга</div>
-                    <div style="font-size: 11px; color: var(--text-secondary);">200 ★</div>
-                </div>
-                <div class="case-item" onclick="openCase('Лудка', 500)">
-                    <div class="case-img">🎰</div>
-                    <div style="font-weight: bold;">Лудка</div>
-                    <div style="font-size: 11px; color: var(--text-secondary);">500 ★</div>
-                </div>
-                <div class="case-item" onclick="openCase('Мажор', 1000)">
-                    <div class="case-img">🏎️</div>
-                    <div style="font-weight: bold;">Мажор</div>
-                    <div style="font-size: 11px; color: var(--text-secondary);">1000 ★</div>
-                </div>
-                <div class="case-item" onclick="openCase('Занос', 1999)" style="grid-column: span 2; border-color: var(--gold);">
-                    <div class="case-img">🚀</div>
-                    <div style="font-weight: bold; color: var(--gold);">ЗАНОС</div>
-                    <div style="font-size: 11px; color: var(--text-secondary);">1999 ★</div>
-                </div>
+            <div class="case-card">
+                <span class="case-icon">💼</span>
+                <div>РАБОТЯГА</div>
+                <button class="buy-btn" onclick="openCase('Работяга', 200)">200 ★</button>
             </div>
-        </div>
+            </div>
     </div>
 
     <div class="nav">
-        <button class="nav-btn" onclick="switchTab('profile-page', this)"><i class="fas fa-wallet"></i><span>Профиль</span></button>
-        <button class="nav-btn active" onclick="switchTab('tap-page', this)"><div class="nav-center"><i class="fas fa-hand-pointer"></i></div><span>Тап</span></button>
-        <button class="nav-btn" onclick="switchTab('cases-page', this)"><i class="fas fa-box-open"></i><span>Кейсы</span></button>
+        <button class="nav-item active" onclick="show('game', this)"><i class="fas fa-gamepad"></i></button>
+        <button class="nav-item" onclick="show('shop', this)"><i class="fas fa-shopping-cart"></i></button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand();
+        let mba = 0; let stars = 0;
 
-        let mbaBalance = 0;
-        let starsBalance = 0;
+        document.getElementById('tap').onclick = () => {
+            mba += 10;
+            document.getElementById('mba').innerText = mba;
+            tg.HapticFeedback.impactOccurred('medium');
+        };
 
-        // Инициализация TON Connect
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect'
-        });
-
-        // Загрузка данных юзера
-        let user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('user-name').innerText = user.first_name;
-            document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
-        }
-
-        // Обновление UI
-        function updateUI() {
-            document.getElementById('mba-balance').innerText = mbaBalance;
-            document.getElementById('stars-balance').innerText = starsBalance;
-        }
-
-        // Навигация
-        function switchTab(id, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        function show(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).style.display = 'block';
             btn.classList.add('active');
         }
 
-        // Тапалка с 3D эффектом
-        const coinWrapper = document.getElementById('coin-wrapper');
-        const coinBtn = document.getElementById('coin-btn');
-
-        coinBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Убираем залипание
-            mbaBalance += 10;
-            updateUI();
-            tg.HapticFeedback.impactOccurred('medium');
-
-            // 3D эффект наклона
-            const randomX = Math.floor(Math.random() * 40) - 20;
-            const randomY = Math.floor(Math.random() * 40) - 20;
-            coinWrapper.style.transform = `scale(0.9) rotateX(${randomX}deg) rotateY(${randomY}deg)`;
-            
-            setTimeout(() => {
-                coinWrapper.style.transform = `scale(1) rotateX(0deg) rotateY(0deg)`;
-            }, 100);
-        });
-
-        // Покупка Звезд (Отправка запроса боту)
-        function buyStars() {
-            tg.HapticFeedback.impactOccurred('heavy');
-            // Отправляем боту команду выставить счет
-            tg.sendData(JSON.stringify({ action: "buy_stars" }));
-            alert("Запрос отправлен боту! Проверь чат.");
+        // ВЫЗОВ ОПЛАТЫ
+        function depositStars() {
+            // Отправляем боту сигнал выставить счет
+            tg.sendData(JSON.stringify({action: "create_invoice", amount: 50})); 
         }
 
-        // Открытие кейса
         function openCase(name, price) {
-            if (starsBalance >= price) {
-                starsBalance -= price;
-                updateUI();
-                tg.HapticFeedback.impactOccurred('heavy');
-                
-                const items = ["Обычный скин", "Редкий токен", "NFT Аватар", "Хлам"];
-                const win = items[Math.floor(Math.random() * items.length)];
-                
-                tg.sendData(JSON.stringify({ action: "open_case", case_name: name, item: win }));
-                alert("🎁 Выпало: " + win + "\nРезультат отправлен в чат!");
+            if (stars >= price) {
+                stars -= price;
+                document.getElementById('stars').innerText = stars;
+                alert("Кейс открыт!");
             } else {
-                alert("❌ Недостаточно Telegram Stars! Нажми '+' сверху, чтобы пополнить.");
-                tg.HapticFeedback.notificationOccurred('error');
-            }
-        }
-
-        function activatePromo() {
-            let code = document.getElementById('promo-input').value.toUpperCase().trim();
-            if (code === "MABANKS2026") {
-                starsBalance += 1000;
-                updateUI();
-                alert("✅ Начислено 1000 Stars!");
-                document.getElementById('promo-input').value = "";
-            } else {
-                alert("❌ Неверный код");
+                alert("Мало Звезд! Нажми на + сверху.");
             }
         }
     </script>
