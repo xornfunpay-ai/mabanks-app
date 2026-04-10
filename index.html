@@ -4,176 +4,198 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --ios-bg: #000000;
-            --glass: rgba(255, 255, 255, 0.1);
-            --gold: #FFD700;
+            --bg: #0b0e16;
+            --card-bg: #161b28;
+            --accent: #3b82f6;
+            --gold: #facc15;
+            --text-main: #ffffff;
+            --text-secondary: #94a3b8;
         }
 
         body {
-            background: var(--ios-bg);
-            color: white;
-            font-family: -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* Glassmorphism Header */
-        .header {
-            backdrop-filter: blur(20px);
-            background: var(--glass);
-            padding: 25px;
-            border-bottom: 0.5px solid rgba(255, 255, 255, 0.2);
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(11, 14, 22, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 35px; height: 35px; border-radius: 8px; background: #2dd4bf; border: 2px solid #ffffff20; }
+        
+        .stars-badge {
+            background: #1e293b;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            border: 1px solid #ffffff10;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 90px;
+        }
+
+        /* Banner Card */
+        .banner {
+            background: linear-gradient(90deg, #1e40af, #3b82f6);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .banner h2 { margin: 0; font-size: 18px; }
+        .banner-timer { font-size: 14px; margin-top: 10px; opacity: 0.9; display: flex; align-items: center; gap: 5px; }
+
+        /* Leaderboard Box */
+        .leader-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border: 1px solid #ffffff05;
+        }
+
+        /* Case Grid */
+        .section-title { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 16px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        .case-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 15px;
             text-align: center;
-            z-index: 10;
+            border: 1px solid #ffffff05;
+            transition: 0.2s;
         }
+        .case-item:active { transform: scale(0.95); }
+        .case-img { width: 80px; height: 80px; margin: 0 auto 10px; }
 
-        .balance-label { font-size: 14px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
-        .balance-value { font-size: 36px; font-weight: 800; color: var(--gold); margin-top: 5px; }
-        .stars-value { font-size: 16px; color: #00FF00; opacity: 0.9; }
-
-        /* Контент страниц */
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; z-index: 5; }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Тап-зона с 3D */
-        .tap-area { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; position: relative; }
-        #canvas-3d { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-        .score-display {
-            font-size: 60px; font-weight: 800; color: white;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 20; opacity: 0.2; pointer-events: none;
-        }
-
-        /* Навигация iOS */
+        /* Bottom Nav */
         .nav {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(20px); border-radius: 30px;
-            display: flex; justify-content: space-around; padding: 15px 0;
-            border: 0.5px solid rgba(255, 255, 255, 0.1); z-index: 30;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #111827;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 25px;
+            border-top: 1px solid #ffffff05;
         }
-        .nav-item { color: #8E8E93; border: none; background: none; font-size: 12px; font-weight: 600; cursor: pointer;}
-        .nav-item.active { color: white; }
+        .nav-btn {
+            background: none; border: none; color: var(--text-secondary);
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            font-size: 10px; transition: 0.2s;
+        }
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn i { font-size: 20px; }
+        
+        .nav-center {
+            width: 50px; height: 50px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: -25px;
+            color: white;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="balance-label">Баланс MBA Tokens</div>
-        <div class="balance-value" id="balance">0</div>
-        <div class="stars-value">≈ <span id="stars">0</span> ⭐ Stars</div>
+    <div class="top-bar">
+        <div class="user-info">
+            <div class="avatar"></div>
+            <span style="font-weight: bold;">MABANKS</span>
+        </div>
+        <div class="stars-badge">
+            <span style="color: var(--gold)">★</span>
+            <span id="star-count">0</span>
+            <span style="color: var(--accent); margin-left: 5px;">+</span>
+        </div>
     </div>
 
-    <div class="content">
-        <div id="game-page" class="page active" style="height: 100%;">
-            <div class="tap-area">
-                <canvas id="canvas-3d"></canvas>
-                <div class="score-display" id="tap-score">+10</div>
+    <div class="main">
+        <div class="banner">
+            <h2>Конкурс MBA Token</h2>
+            <div style="font-size: 12px; opacity: 0.8;">💎 50,000</div>
+            <div class="banner-timer">
+                <i class="far fa-clock"></i> 0 дней 18:42:10
             </div>
         </div>
 
-        <div id="cases-page" class="page">
-            <h2 style="margin-bottom: 20px;">Кейсы</h2>
-            <p style="opacity: 0.5">Кейсы Pinchuk Edition: Бомж, Работяга, Мажор...<br>Для примера, нажми ГЛАВНАЯ.</p>
+        <div class="leader-box">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-trophy" style="color: var(--gold)"></i>
+                <span>Лидерборд</span>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary);">
+                Мое место: <span style="color: white; background: #334155; padding: 2px 8px; border-radius: 5px;">1065</span>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>Бесплатные Кейсы</span>
+            <span style="color: var(--text-secondary); font-size: 12px;">Свернуть <i class="fas fa-chevron-up"></i></span>
+        </div>
+
+        <div class="grid">
+            <div class="case-item" onclick="openCase('Бомж')">
+                <div class="case-img" style="background: url('https://cdn-icons-png.flaticon.com/512/679/679821.png') center/contain no-repeat;"></div>
+                <div style="font-size: 14px; font-weight: bold;">Бомж</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Бесплатно</div>
+            </div>
+            <div class="case-item" onclick="openCase('Работяга')">
+                <div class="case-img" style="background: url('https://cdn-icons-png.flaticon.com/512/679/679713.png') center/contain no-repeat;"></div>
+                <div style="font-size: 14px; font-weight: bold;">Работяга</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">100 MBA</div>
+            </div>
         </div>
     </div>
 
     <div class="nav">
-        <button class="nav-item active" onclick="showPage('game-page', this)">ГЛАВНАЯ</button>
-        <button class="nav-item" onclick="showPage('cases-page', this)">КЕЙСЫ</button>
+        <button class="nav-btn"><i class="fas fa-rocket"></i><span>Апгрейд</span></button>
+        <button class="nav-btn"><i class="fas fa-hammer"></i><span>Крафты</span></button>
+        <button class="nav-btn active"><div class="nav-center"><i class="fas fa-box-open"></i></div><span>Кейсы</span></button>
+        <button class="nav-btn"><i class="fas fa-bolt"></i><span>Конкурсы</span></button>
+        <button class="nav-btn"><i class="fas fa-user-group"></i><span>Друзья</span></button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        let balance = 0;
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- ЛОГИКА 3D ---
-        const canvas = document.getElementById('canvas-3d');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.7), 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight * 0.7);
-
-        // Создаем монетку (цилиндр)
-        const geometry = new THREE.CylinderGeometry(2, 2, 0.3, 100);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: 0xFFD700, // Золото
-            specular: 0x222222, // Блеск
-            shininess: 100, // Яркость блеска
-            shading: THREE.FlatShading
-        });
-        const coin = new THREE.Mesh(geometry, material);
-        scene.add(coin);
-
-        // Поворачиваем монетку, чтобы она стояла
-        coin.rotation.x = Math.PI / 2;
-
-        // Добавляем свет
-        const ambientLight = new THREE.AmbientLight(0x404040); // Рассеянный свет
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Направленный свет (как солнце)
-        directionalLight.position.set(1, 1, 1).normalize();
-        scene.add(directionalLight);
-
-        camera.position.z = 5;
-
-        // Обработка тапа на 3D монету
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        canvas.addEventListener('touchstart', onTouchStart, false);
-
-        function onTouchStart(event) {
-            // Преобразуем координаты касания
-            mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
-            mouse.y = - (event.touches[0].clientY / (window.innerHeight * 0.7)) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children);
-
-            if (intersects.length > 0) {
-                // Если попали по монете
-                balance += 10;
-                updateUI();
-                tg.HapticFeedback.impactOccurred('medium');
-
-                // Анимация тапа
-                coin.rotation.x -= 0.2; // Наклоняем
-                setTimeout(() => coin.rotation.x += 0.2, 50); // Возвращаем
-            }
-        }
-
-        // Рендеринг (постоянный цикл)
-        function animate() {
-            requestAnimationFrame(animate);
-            // Медленное вращение
-            coin.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // --- ЛОГИКА ИНТЕРФЕЙСА ---
-        function updateUI() {
-            document.getElementById('balance').innerText = balance.toLocaleString();
-            let stars = (balance / 10).toFixed(0);
-            document.getElementById('stars').innerText = stars;
-        }
-
-        function showPage(id, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
+        function openCase(name) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            // Здесь будет логика открытия, как мы делали раньше
+            alert("Открываем кейс: " + name);
         }
     </script>
 </body>
