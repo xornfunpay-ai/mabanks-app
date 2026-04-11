@@ -3,81 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Case Opener — Кейсы с NFT и подключением кошелька</title>
+    <title>Case Battles — Реальное Web3 подключение | Анимация прокрутки + Тапалка</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* легкий эффект "приложения" */
         }
 
         body {
-            background: radial-gradient(circle at 20% 30%, #0c0f1c, #02040c);
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Poppins', sans-serif;
-            color: #f0f3fc;
+            background: radial-gradient(circle at 10% 20%, #0b0f1c, #010101);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Poppins', sans-serif;
+            color: #f0f3ff;
             overflow-x: hidden;
             scroll-behavior: smooth;
         }
 
-        /* Кастомный скролл */
+        /* кастом скролл */
         ::-webkit-scrollbar {
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #10131f;
+            background: #11151f;
         }
         ::-webkit-scrollbar-thumb {
-            background: #f0a500;
+            background: #f5a623;
             border-radius: 12px;
         }
 
-        /* Контейнер */
         .container {
             max-width: 1300px;
             margin: 0 auto;
             padding: 1.5rem 2rem 4rem;
         }
 
-        /* Хедер с кошельком */
+        /* Хедер с реальным кошельком */
         .top-bar {
             display: flex;
             justify-content: flex-end;
             margin-bottom: 1.5rem;
         }
         .wallet-button {
-            background: linear-gradient(95deg, #1e293b, #0f172a);
-            border: 1px solid rgba(240, 165, 0, 0.5);
+            background: rgba(20, 28, 40, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(245, 166, 35, 0.6);
             padding: 0.7rem 1.6rem;
             border-radius: 60px;
             font-weight: 600;
             font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
-            transition: all 0.2s;
-            backdrop-filter: blur(8px);
-            color: #ffde9c;
+            transition: 0.2s;
+            font-family: monospace;
         }
         .wallet-button:hover {
-            border-color: #f0a500;
-            background: #1e2a3e;
-            transform: scale(1.02);
-            box-shadow: 0 0 12px rgba(240,165,0,0.3);
+            border-color: #f5a623;
+            background: #1f2a3e;
+            transform: translateY(-2px);
         }
         .wallet-connected {
-            background: #0f2c1f;
-            border-color: #4caf50;
-            color: #b9f6ca;
+            border-color: #2ecc71;
+            background: #0e2a1c;
+            color: #b0f5c5;
         }
         .wallet-address {
-            font-family: monospace;
             font-size: 0.8rem;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
-        /* Hero */
+        /* Hero + анимация */
         .hero {
             text-align: center;
             margin: 1rem 0 3rem;
@@ -85,95 +81,107 @@
         .hero h1 {
             font-size: clamp(2rem, 7vw, 3.8rem);
             font-weight: 800;
-            background: linear-gradient(135deg, #FFD966, #f0a500, #ff7e33);
+            background: linear-gradient(135deg, #FFD966, #f5a623, #ff6b4a);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
         }
-        .hero p {
-            color: #9aa4c9;
-            margin-top: 0.8rem;
+        .badge-web3 {
+            background: #1e2a3a80;
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            margin-bottom: 1rem;
+            border: 1px solid #f5a623;
         }
 
         /* Анимация прокрутки */
         .scroll-reveal {
             opacity: 0;
-            transform: translateY(35px);
-            transition: opacity 0.7s ease, transform 0.7s ease;
+            transform: translateY(32px);
+            transition: opacity 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
         .scroll-reveal.revealed {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* Сетка кейсов (карточки кликабельные) */
+        /* Сетка кейсов */
         .cases-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 2rem;
-            margin: 2rem 0 2rem;
+            margin: 2rem 0;
         }
 
-        /* Карточка кейса — ТАПАЛКА! */
+        /* Карточка-тапалка */
         .case-card {
-            background: rgba(18, 22, 40, 0.75);
+            background: rgba(18, 22, 45, 0.75);
             backdrop-filter: blur(12px);
             border-radius: 2rem;
-            border: 1px solid rgba(240, 165, 0, 0.35);
+            border: 1px solid rgba(245, 166, 35, 0.4);
             cursor: pointer;
             transition: transform 0.2s, border 0.2s, box-shadow 0.2s;
             overflow: hidden;
-            position: relative;
         }
         .case-card:hover {
             transform: translateY(-6px);
-            border-color: #f0a500;
-            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.6);
+            border-color: #f5a623;
+            box-shadow: 0 20px 30px -10px rgba(245,166,35,0.2);
         }
         .case-card:active {
             transform: scale(0.98);
         }
         .card-header {
-            padding: 1.5rem 1.5rem 0.8rem;
             display: flex;
             align-items: center;
             gap: 1rem;
+            padding: 1.3rem 1.5rem 0.8rem;
         }
         .case-icon {
-            font-size: 3.2rem;
-            filter: drop-shadow(0 6px 8px black);
-        }
-        .case-title {
-            flex: 1;
+            font-size: 3rem;
+            filter: drop-shadow(0 4px 6px black);
         }
         .case-title h3 {
-            font-size: 1.7rem;
+            font-size: 1.6rem;
             font-weight: 700;
         }
         .case-tag {
             font-size: 0.7rem;
-            background: rgba(240,165,0,0.25);
+            background: rgba(245,166,35,0.25);
             display: inline-block;
-            padding: 0.2rem 0.7rem;
+            padding: 0.2rem 0.8rem;
             border-radius: 30px;
-            margin-top: 6px;
         }
         .card-preview {
-            padding: 0 1.5rem 1rem;
+            padding: 0 1.5rem 0.5rem;
             font-size: 0.85rem;
             color: #b9c3e6;
         }
-        .nft-preview-icons {
-            display: flex;
-            gap: 0.5rem;
+        .nft-preview {
             padding: 0.8rem 1.5rem 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 1.5rem;
-            justify-content: space-around;
+            border-top: 1px solid rgba(255,255,240,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4rem;
             opacity: 0.7;
         }
 
-        /* Модальное окно с результатом открытия */
+        /* Анимация встряски при тапе */
+        @keyframes shakeNft {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-2px, 0px) rotate(1deg); background: rgba(245,166,35,0.25);}
+            40% { transform: translate(2px, -1px) rotate(0deg);}
+            60% { transform: translate(-1px, 1px) rotate(1deg);}
+            80% { transform: translate(1px, -1px) rotate(0deg);}
+            100% { transform: translate(0,0) rotate(0); background: transparent;}
+        }
+        .case-shake {
+            animation: shakeNft 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        /* Модалка результата */
         .modal {
             position: fixed;
             top: 0;
@@ -188,88 +196,64 @@
             z-index: 1000;
             visibility: hidden;
             opacity: 0;
-            transition: visibility 0.2s, opacity 0.2s;
+            transition: 0.2s;
         }
         .modal.open {
             visibility: visible;
             opacity: 1;
         }
         .modal-content {
-            background: linear-gradient(145deg, #181e30, #0f1322);
+            background: linear-gradient(145deg, #1a1f33, #0c0f1c);
             border-radius: 2rem;
             max-width: 380px;
             width: 85%;
             padding: 2rem;
             text-align: center;
-            border: 1px solid #f0a500;
-            box-shadow: 0 30px 40px rgba(0,0,0,0.5);
+            border: 1px solid #f5a623;
             transform: scale(0.9);
-            transition: transform 0.2s;
+            transition: 0.2s;
         }
         .modal.open .modal-content {
             transform: scale(1);
         }
         .modal-icon {
             font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-        .modal h3 {
-            font-size: 1.9rem;
-            margin-bottom: 0.5rem;
         }
         .modal-chance {
             background: #2a2f44;
-            display: inline-block;
             padding: 0.3rem 1rem;
             border-radius: 30px;
-            font-size: 0.8rem;
+            display: inline-block;
             margin: 1rem 0;
+            font-size: 0.8rem;
         }
         .close-modal {
-            background: #f0a500;
+            background: #f5a623;
             border: none;
             padding: 0.6rem 1.8rem;
             border-radius: 40px;
             font-weight: bold;
-            margin-top: 1rem;
             cursor: pointer;
-            color: #0f0f1a;
-            transition: 0.1s;
+            color: #0c0f1a;
         }
-        .close-modal:active {
-            transform: scale(0.96);
-        }
-
-        /* эффект вспышки при открытии */
-        @keyframes shakeFlash {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-2px, 0px) rotate(1deg); background: rgba(240,165,0,0.3);}
-            40% { transform: translate(2px, -1px) rotate(0deg);}
-            60% { transform: translate(-1px, 1px) rotate(1deg);}
-            80% { transform: translate(1px, -1px) rotate(0deg); background: rgba(240,165,0,0);}
-            100% { transform: translate(0,0) rotate(0);}
-        }
-        .case-shake {
-            animation: shakeFlash 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-        }
-
         footer {
             text-align: center;
-            margin-top: 4rem;
-            padding-top: 2rem;
-            color: #5d6a8f;
+            margin-top: 3rem;
+            color: #5f6e97;
             font-size: 0.8rem;
         }
         @media (max-width: 700px) {
             .container {
                 padding: 1rem;
             }
-            .cases-grid {
-                gap: 1.2rem;
-            }
         }
-        button {
-            font-family: inherit;
+        button, .case-card {
+            user-select: none;
+        }
+        .warning-msg {
+            color: #f5a623;
+            font-size: 0.7rem;
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -277,48 +261,49 @@
 
 <div class="container">
     <div class="top-bar">
-        <div class="wallet-button" id="walletConnectBtn">
-            🔌 <span id="walletStatusText">Подключить кошелёк</span>
+        <div class="wallet-button" id="realWalletBtn">
+            🔌 <span id="walletStatusText">Подключить Web3 кошелёк</span>
         </div>
     </div>
 
     <div class="hero scroll-reveal">
-        <div style="font-size:0.8rem; margin-bottom:8px;">🔥 АНИМАЦИЯ ПРОКРУТКИ + ТАПАЛКА 🔥</div>
-        <h1>🎲 CRYPTO CASE OPENER</h1>
-        <p>Нажми на любой кейс — открой случайный NFT с реальным шансом! Подключи кошелёк, чтобы записывать дропы (демо-режим).</p>
+        <div class="badge-web3">⚡ РЕАЛЬНОЕ ПОДКЛЮЧЕНИЕ (MetaMask / WalletConnect) ⚡</div>
+        <h1>🎰 КЕЙСЫ С NFT & ШАНСАМИ</h1>
+        <p>Тапай по кейсу → выпадение NFT по шансам. Реальный кошелёк Ethereum (демо-транзакции в консоль). Анимация прокрутки и встряски.</p>
+        <div class="warning-msg" id="networkMsg"></div>
     </div>
 
-    <div class="cases-grid" id="casesGrid">
-        <!-- Кейсы будут отрисованы через JS -->
+    <div class="cases-grid" id="casesContainer">
+        <!-- кейсы из js -->
     </div>
     <div class="scroll-reveal" style="text-align: center; margin-top: 1rem; font-size:0.85rem;">
-        ⚡ Кликни по карточке — откроется кейс с выпадением NFT ⚡
+        👆 Нажми на любой кейс — открой случайный NFT с реальной вероятностью 👆
     </div>
     <footer class="scroll-reveal">
-        ✨ Каждый кейс имеет свой пул NFT и шансы. При открытии анимация и результат. Подключение кошелька имитирует Web3.
+        🔥 Подключив кошелёк, открытие кейса логируется в консоль с вашим адресом. Web3 только для аутентификации (без списания средств).
     </footer>
 </div>
 
-<!-- Модальное окно результата -->
+<!-- Модалка -->
 <div id="resultModal" class="modal">
     <div class="modal-content">
         <div class="modal-icon" id="modalIcon">🎁</div>
-        <h3 id="modalTitle">Вам выпало!</h3>
-        <p id="modalNftName" style="font-size: 1.4rem; font-weight: bold; margin: 0.5rem 0;">Legendary Item</p>
-        <div class="modal-chance" id="modalChance">Шанс: 0%</div>
+        <h3 id="modalTitle">ВЫПАЛО NFT</h3>
+        <p id="modalNftName" style="font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0;">Legendary</p>
+        <div class="modal-chance" id="modalChance">Шанс: --</div>
         <button class="close-modal" id="closeModalBtn">Закрыть</button>
     </div>
 </div>
 
 <script>
-    // ---------- ДАННЫЕ КЕЙСОВ (с полными списками NFT и шансами) ----------
-    const CASES = [
+    // ---------- ДАННЫЕ КЕЙСОВ (6 кейсов, полные NFT и шансы) ----------
+    const CASES_LIST = [
         {
             id: "bomzh",
             name: "КЕЙС БОМЖ",
             icon: "🧦",
             tag: "⭐️ Уличный",
-            previewDesc: "Рискни — найди сокровище на дне пакета",
+            desc: "Рискни найти сокровище",
             nfts: [
                 { name: "Грязный носок", icon: "🧦", chance: 48.5 },
                 { name: "Рваная кепка", icon: "🧢", chance: 32.0 },
@@ -332,7 +317,7 @@
             name: "КЕЙС РАБОТЯГА",
             icon: "🔨",
             tag: "💼 Трудяга",
-            previewDesc: "Инструменты и рабочая жиза",
+            desc: "Инструменты и жиза",
             nfts: [
                 { name: "Потертая спецовка", icon: "👕", chance: 40 },
                 { name: "Ржавый ключ", icon: "🔧", chance: 28 },
@@ -346,7 +331,7 @@
             name: "КЕЙС ЛУДКА",
             icon: "🎣",
             tag: "🐟 Рыбак",
-            previewDesc: "Трофеи с глубины",
+            desc: "Трофеи с глубины",
             nfts: [
                 { name: "Ржавый крючок", icon: "🪝", chance: 45 },
                 { name: "Резиновый сапог", icon: "👢", chance: 25 },
@@ -360,7 +345,7 @@
             name: "КЕЙС ЗАНОС",
             icon: "💨",
             tag: "🏎️ Дрифт",
-            previewDesc: "Адреналин и резина",
+            desc: "Адреналин и резина",
             nfts: [
                 { name: "Проколотая шина", icon: "🛞", chance: 38 },
                 { name: "Дым из-под колес", icon: "🌫️", chance: 27 },
@@ -374,7 +359,7 @@
             name: "КЕЙС МАЖОР",
             icon: "💎",
             tag: "💰 Люкс",
-            previewDesc: "Элитные NFT",
+            desc: "Элитные NFT",
             nfts: [
                 { name: "Золотая кредитка", icon: "💳", chance: 35 },
                 { name: "Яхта в аренду", icon: "⛵", chance: 25 },
@@ -388,7 +373,7 @@
             name: "КЕЙС БРО",
             icon: "🤜🤛",
             tag: "🏆 Дружбан",
-            previewDesc: "Братанский набор",
+            desc: "Братанский набор",
             nfts: [
                 { name: "Бро-фистбамп", icon: "👊", chance: 44 },
                 { name: "Банка энергоса", icon: "⚡", chance: 26 },
@@ -399,121 +384,171 @@
         }
     ];
 
-    // Состояние кошелька (демо)
-    let walletConnected = false;
-    let walletAddress = "";
+    // --- Реальное подключение к кошельку (ethereum) ---
+    let userWalletAddress = null;
+    let walletConnectedFlag = false;
 
-    // DOM элементы
-    const walletBtn = document.getElementById("walletConnectBtn");
+    const walletBtn = document.getElementById("realWalletBtn");
     const walletStatusSpan = document.getElementById("walletStatusText");
-    const casesGrid = document.getElementById("casesGrid");
+    const networkMsgSpan = document.getElementById("networkMsg");
+
+    // Проверка наличия Web3 провайдера
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert("❌ MetaMask не установлен! Установите расширение MetaMask для реального Web3 подключения.");
+            networkMsgSpan.innerText = "❌ Кошелёк не найден. Установите MetaMask.";
+            return false;
+        }
+        try {
+            // Запрашиваем доступ к аккаунтам
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            if (accounts.length === 0) throw new Error("Нет аккаунтов");
+            const address = accounts[0];
+            userWalletAddress = address;
+            walletConnectedFlag = true;
+            const shortAddr = address.slice(0, 6) + "..." + address.slice(-4);
+            walletStatusSpan.innerHTML = `🟢 ${shortAddr}`;
+            walletBtn.classList.add("wallet-connected");
+            networkMsgSpan.innerText = "✅ Кошелёк подключён! (Режим логирования открытий)";
+            
+            // Слушаем смену аккаунта
+            window.ethereum.on('accountsChanged', (newAccounts) => {
+                if (newAccounts.length === 0) {
+                    disconnectWallet();
+                } else {
+                    userWalletAddress = newAccounts[0];
+                    const newShort = newAccounts[0].slice(0,6)+"..."+newAccounts[0].slice(-4);
+                    walletStatusSpan.innerHTML = `🟢 ${newShort}`;
+                    walletConnectedFlag = true;
+                }
+            });
+            return true;
+        } catch (error) {
+            console.error("Ошибка подключения:", error);
+            alert("Ошибка при подключении кошелька: " + (error.message || "Unknown"));
+            networkMsgSpan.innerText = "⚠️ Ошибка подключения. Попробуйте снова.";
+            return false;
+        }
+    }
+
+    function disconnectWallet() {
+        userWalletAddress = null;
+        walletConnectedFlag = false;
+        walletStatusSpan.innerHTML = `🔌 Подключить Web3 кошелёк`;
+        walletBtn.classList.remove("wallet-connected");
+        networkMsgSpan.innerText = "Кошелёк отключён. Подключите для записи открытий.";
+    }
+
+    // Обработчик кнопки
+    walletBtn.addEventListener("click", async () => {
+        if (walletConnectedFlag) {
+            // отключение (просто очищаем локально, ethereum не имеет метода отключения)
+            disconnectWallet();
+        } else {
+            await connectWallet();
+        }
+    });
+
+    // --- Логика открытия кейса (ТАПАЛКА) ---
+    function getRandomNFT(nftList) {
+        let total = nftList.reduce((sum, n) => sum + n.chance, 0);
+        if (Math.abs(total - 100) > 0.01) console.warn("сумма шансов !=100", total);
+        let rand = Math.random() * 100;
+        let acc = 0;
+        for (let n of nftList) {
+            acc += n.chance;
+            if (rand <= acc) return n;
+        }
+        return nftList[0];
+    }
+
+    // модальные элементы
     const modal = document.getElementById("resultModal");
-    const modalIcon = document.getElementById("modalIcon");
+    const modalIconSpan = document.getElementById("modalIcon");
     const modalTitle = document.getElementById("modalTitle");
     const modalNftName = document.getElementById("modalNftName");
-    const modalChance = document.getElementById("modalChance");
+    const modalChanceSpan = document.getElementById("modalChance");
     const closeModalBtn = document.getElementById("closeModalBtn");
 
-    // Функция подключения/отключения кошелька (симуляция)
-    function toggleWallet() {
-        if (!walletConnected) {
-            // имитация подключения
-            walletAddress = "0x" + Math.random().toString(16).substring(2, 10) + "...";
-            walletConnected = true;
-            walletStatusSpan.innerHTML = `🟢 ${walletAddress}`;
-            walletBtn.classList.add("wallet-connected");
-        } else {
-            walletConnected = false;
-            walletAddress = "";
-            walletStatusSpan.innerHTML = `🔌 Подключить кошелёк`;
-            walletBtn.classList.remove("wallet-connected");
-        }
+    function showModal(nft, caseName) {
+        modalIconSpan.innerText = nft.icon;
+        modalTitle.innerText = `🎲 ${caseName} 🎲`;
+        modalNftName.innerText = nft.name;
+        modalChanceSpan.innerHTML = `✨ Шанс: ${nft.chance}% ✨`;
+        modal.classList.add("open");
     }
 
-    // Функция выбора случайного NFT на основе весов (шансы в процентах)
-    function rollNFT(nftList) {
-        // сумма шансов всегда 100 (проверим)
-        let total = nftList.reduce((sum, nft) => sum + nft.chance, 0);
-        if (Math.abs(total - 100) > 0.01) console.warn("Шансы не 100%");
-        let rand = Math.random() * 100;
-        let accum = 0;
-        for (let nft of nftList) {
-            accum += nft.chance;
-            if (rand <= accum) return nft;
-        }
-        return nftList[0]; // fallback
+    function closeModal() {
+        modal.classList.remove("open");
     }
 
-    // Открытие кейса (тапалка) с анимацией и модалкой
-    function openCase(caseData, cardElement) {
-        // Анимация встряски на карточке
+    // Открытие кейса (тап + анимация + логирование в консоль с адресом кошелька)
+    function openCaseAction(caseData, cardElement) {
+        // анимация встряски
         cardElement.classList.add("case-shake");
         setTimeout(() => {
             cardElement.classList.remove("case-shake");
-        }, 350);
-
-        // Роллим NFT
-        const wonNft = rollNFT(caseData.nfts);
-        // Показываем модалку с результатом
-        modalIcon.innerText = wonNft.icon;
-        modalTitle.innerText = "🎉 ВЫ ОТКРЫЛИ 🎉";
-        modalNftName.innerText = wonNft.name;
-        modalChance.innerHTML = `🎲 Шанс выпадения: ${wonNft.chance}%`;
-        modal.classList.add("open");
-
-        // Если кошелёк подключён, добавляем запись в консоль (имитация записи в блокчейн)
-        if (walletConnected) {
-            console.log(`[WALLET ${walletAddress}] Открыт кейс "${caseData.name}" → получен NFT: ${wonNft.name} (шанс ${wonNft.chance}%)`);
-            // Можно было бы показать уведомление, но модалка и так всё покажет
+        }, 400);
+        
+        // выбираем рандомный NFT
+        const wonNft = getRandomNFT(caseData.nfts);
+        
+        // Логирование: если кошелёк подключен — пишем реальный адрес
+        if (walletConnectedFlag && userWalletAddress) {
+            console.log(`🔗 [WEB3: ${userWalletAddress}] Открыт кейс "${caseData.name}" → Выпал NFT: ${wonNft.name} (шанс ${wonNft.chance}%)`);
+            // Можно дополнительно эмитировать событие в блокчейн (имитация)
         } else {
-            console.log(`[ГОСТЬ] Открыт кейс "${caseData.name}" → выпал ${wonNft.name}`);
+            console.log(`👤 [ГОСТЬ] Открыт кейс "${caseData.name}" → Выпал NFT: ${wonNft.name} (шанс ${wonNft.chance}%)`);
         }
+        
+        // Показываем модалку с результатом
+        showModal(wonNft, caseData.name);
     }
 
-    // Отрисовка всех кейсов с добавлением слушателей (тапалка)
+    // --- Отрисовка карточек (кейсов) с тапалкой ---
     function renderCases() {
-        casesGrid.innerHTML = "";
-        CASES.forEach(caseItem => {
+        const container = document.getElementById("casesContainer");
+        container.innerHTML = "";
+        CASES_LIST.forEach(c => {
             const card = document.createElement("div");
             card.className = "case-card scroll-reveal";
             
-            // Заголовок
+            // Header
             const headerDiv = document.createElement("div");
             headerDiv.className = "card-header";
             headerDiv.innerHTML = `
-                <div class="case-icon">${caseItem.icon}</div>
+                <div class="case-icon">${c.icon}</div>
                 <div class="case-title">
-                    <h3>${caseItem.name}</h3>
-                    <div class="case-tag">${caseItem.tag}</div>
+                    <h3>${c.name}</h3>
+                    <div class="case-tag">${c.tag}</div>
                 </div>
             `;
-            const previewDiv = document.createElement("div");
-            previewDiv.className = "card-preview";
-            previewDiv.innerText = caseItem.previewDesc;
+            const descDiv = document.createElement("div");
+            descDiv.className = "card-preview";
+            descDiv.innerText = c.desc;
             
-            // Мини-превью иконок NFT
             const previewIcons = document.createElement("div");
-            previewIcons.className = "nft-preview-icons";
-            const shortIcons = caseItem.nfts.slice(0, 4).map(n => n.icon).join(" ");
-            previewIcons.innerHTML = `${shortIcons} ${caseItem.nfts.length > 4 ? '...' : ''}`;
+            previewIcons.className = "nft-preview";
+            const shortIcons = c.nfts.slice(0, 4).map(n => n.icon).join(" ");
+            previewIcons.innerHTML = `${shortIcons} ${c.nfts.length > 4 ? '...' : ''}`;
             
             card.appendChild(headerDiv);
-            card.appendChild(previewDiv);
+            card.appendChild(descDiv);
             card.appendChild(previewIcons);
             
-            // Тапалка: клик по карточке открывает кейс
+            // Тапалка
             card.addEventListener("click", (e) => {
                 e.stopPropagation();
-                openCase(caseItem, card);
+                openCaseAction(c, card);
             });
             
-            casesGrid.appendChild(card);
+            container.appendChild(card);
         });
     }
 
-    // Анимация прокрутки (Intersection Observer)
+    // --- АНИМАЦИЯ ПРОКРУТКИ (Intersection Observer) ---
     function initScrollAnimation() {
-        const items = document.querySelectorAll('.scroll-reveal');
+        const elements = document.querySelectorAll('.scroll-reveal');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -521,41 +556,59 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15, rootMargin: "0px 0px -30px 0px" });
-        items.forEach(el => observer.observe(el));
+        }, { threshold: 0.15, rootMargin: "0px 0px -20px 0px" });
+        elements.forEach(el => observer.observe(el));
     }
-
-    // Закрытие модалки
-    function closeModal() {
-        modal.classList.remove("open");
+    
+    // Доп. проверка уже видимых после рендера
+    function ensureVisibleAfterRender() {
+        const revealDivs = document.querySelectorAll('.scroll-reveal');
+        const tempObs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('revealed');
+            });
+        }, { threshold: 0.1 });
+        revealDivs.forEach(el => tempObs.observe(el));
     }
-
-    // Инициализация событий
+    
+    // Проверка наличия ethereum при загрузке (для информации)
+    function checkWeb3Availability() {
+        if (window.ethereum) {
+            networkMsgSpan.innerText = "🟢 Web3 доступен (MetaMask). Нажмите для подключения.";
+        } else {
+            networkMsgSpan.innerText = "⚠️ Web3 не обнаружен. Установите MetaMask для реального подключения.";
+        }
+    }
+    
+    // инициализация
     function init() {
         renderCases();
-        initScrollAnimation();   // анимация появления при скролле
+        initScrollAnimation();
+        setTimeout(ensureVisibleAfterRender, 100);
+        checkWeb3Availability();
         
-        // Подключение кошелька
-        walletBtn.addEventListener("click", toggleWallet);
-        
-        // Модалка
+        // Модалка: закрытие
         closeModalBtn.addEventListener("click", closeModal);
         modal.addEventListener("click", (e) => {
             if (e.target === modal) closeModal();
         });
         
-        // Дополнительно проверяем, чтобы уже видимые элементы получили класс (на случай быстрой загрузки)
-        setTimeout(() => {
-            const revealItems = document.querySelectorAll('.scroll-reveal');
-            const tempObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) entry.target.classList.add('revealed');
-                });
-            }, { threshold: 0.1 });
-            revealItems.forEach(el => tempObserver.observe(el));
-        }, 100);
+        // авто-обнаружение, если ранее был подключен (проверим аккаунты при загрузке, но не запрашиваем разрешение)
+        if (window.ethereum && window.ethereum.selectedAddress) {
+            // не запрашиваем сразу, только если пользователь уже дал доступ, можем показать статус
+            window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+                if (accounts && accounts.length > 0) {
+                    userWalletAddress = accounts[0];
+                    walletConnectedFlag = true;
+                    const shortAddr = userWalletAddress.slice(0,6)+"..."+userWalletAddress.slice(-4);
+                    walletStatusSpan.innerHTML = `🟢 ${shortAddr}`;
+                    walletBtn.classList.add("wallet-connected");
+                    networkMsgSpan.innerText = "✅ Кошелёк уже подключён!";
+                }
+            }).catch(()=>{});
+        }
     }
-
+    
     init();
 </script>
 </body>
